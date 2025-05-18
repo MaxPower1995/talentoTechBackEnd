@@ -1,6 +1,5 @@
 import java.util.Scanner;
 import java.util.ArrayList;
-import java.util.InputMismatchException;
 
 public class Main {
     static Scanner scanner = new Scanner(System.in);
@@ -22,8 +21,11 @@ public class Main {
             System.out.print("Seleccione una opción: ");
             
 
-            opcion = scanner.nextInt();
-            scanner.nextLine(); // Limpiar buffer
+            opcion = leerIntValido(scanner);
+            if(opcion == -1) {
+                System.out.println("Error: Opción inválida.");
+                opcion = 5; // Salir del programa
+            }
             
             switch (opcion) {
                 case 1 -> crearArticulo();
@@ -43,7 +45,11 @@ public class Main {
     public static void crearArticulo() {
         System.out.println("### Crear Artículo ###");
         System.out.print("Ingrese el ID del artículo: ");
-        int id = scanner.nextInt(); scanner.nextLine(); // Limpiar el buffer
+        int id = leerIntValido(scanner); 
+        if(id == -1) {
+            System.out.println("Error: ID inválido.");
+            return;
+        }
         if (existeArticuloConId(id)) {
             System.out.println("El ID ya existe. Por favor, ingrese un ID único.");
             return;
@@ -61,7 +67,7 @@ public class Main {
             return;
         }
         System.out.print("Ingrese el precio del artículo: ");
-        double precio = scanner.nextDouble();
+        double precio = leerDoubleValidado(scanner);
         if (precio <= 0 || precio > 99999999) {
             System.out.println("El precio debe ser mayor a 0 y menor a 99999999.");
             return;
@@ -91,18 +97,30 @@ public class Main {
             return;
         }
         System.out.print("Ingrese el ID del artículo a modificar: ");
-        int id = scanner.nextInt(); scanner.nextLine(); // Limpiar el buffer
+        int id = leerIntValido(scanner); // Limpiar el buffer
+        if(id == -1) {
+            System.out.println("Error: ID inválido.");
+            return;
+        }
+        if(!existeArticuloConId(id)) {
+            System.out.println("El ID no existe. Por favor, ingrese un ID válido.");
+            return;
+        }
         for (Articulo articulo : lista) {
             if (articulo.id == id) {
                 System.out.print("Ingrese el nuevo nombre del artículo: ");
                 articulo.nombre = scanner.nextLine();
+                if(String.valueOf(articulo.nombre).length() > 20) {
+                    System.out.println("El nombre no puede tener más de 20 caracteres.");
+                    return;
+                }
                 System.out.print("Ingrese el nuevo precio del artículo: ");
-                articulo.precio = scanner.nextDouble();
+                articulo.precio = leerDoubleValidado(scanner);
                 System.out.println("Artículo modificado con éxito.");
                 return;
             }
-        System.out.println("No se encontró un artículo con ese ID.");
         }
+        System.out.println("No se encontró un artículo con ese ID.");
     }
 
     public static void eliminarArticulo() {
@@ -113,17 +131,27 @@ public class Main {
             return;
         }
         System.out.print("Ingrese el ID del artículo a eliminar: ");
-        int id = scanner.nextInt(); scanner.nextLine(); // Limpiar el buffer
+        int id = leerIntValido(scanner); // Limpiar el buffer
+        if(id == -1) {
+            System.out.println("Error: ID inválido.");
+            return;
+        }
+        if(!existeArticuloConId(id)) {
+            System.out.println("El ID no existe. Por favor, ingrese un ID válido.");
+            return;
+        }
         for (Articulo articulo : lista) {
             if (articulo.id == id) {
                 lista.remove(articulo);
+                articulo.mostrar();
                 System.out.println("Artículo eliminado con éxito.");
                 return;
             }
         }
         //Funcion lamda o flecha
         // lista.removeIf(articulo -> articulo.id == id);
-        System.out.println("No se encontró un artículo con ese ID.");
+
+        
     }
 
     private static void precargarArticulos() {
@@ -133,6 +161,11 @@ public class Main {
         lista.add(new Articulo(3, "Tablet", 350.75));
         lista.add(new Articulo(4, "Auriculares", 89.99));
         lista.add(new Articulo(5, "Teclado", 45.25));
+        lista.add(new Articulo(6, "Ratón", 25.50));
+        lista.add(new Articulo(7, "Monitor", 299.99));
+        lista.add(new Articulo(8, "Impresora", 199.99));
+        lista.add(new Articulo(9, "Cámara", 499.99));
+        lista.add(new Articulo(10, "Proyector", 799.99));
     }
 
     public static boolean existeArticuloConId(int id) {
@@ -142,5 +175,29 @@ public class Main {
             }
         }
         return false; // ID no existe
+    }
+
+    public static int leerIntValido(Scanner scanner) {
+        int opcion = -1; // Inicializa la opción
+        String input = scanner.nextLine();  // Siempre lee como String
+        try {
+            opcion = Integer.parseInt(input);  // Intenta convertir a int
+            return opcion;  // Si la conversión funciona, retorna el valor
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Debe ingresar un número entero. Intente nuevamente.");
+        }
+        return opcion;  // Si se alcanzan los intentos, retorna -1 para salir
+    }
+
+    public static double leerDoubleValidado(Scanner scanner) {
+        double valor = -1; // Inicializa el valor
+        String input = scanner.nextLine();
+        try {
+            valor = Double.parseDouble(input); // Solo acepta punto decimal
+            // Resto de la validación igual...
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Use punto decimal (ej: 19.95)");
+        }
+        return valor; // Retorna el valor validado
     }
 }
